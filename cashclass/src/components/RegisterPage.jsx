@@ -1,6 +1,7 @@
+// src/components/RegisterPage.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../firebase";
 import {
   Box,
@@ -9,16 +10,16 @@ import {
   Typography,
   Paper,
   Avatar,
-  Divider,
   Alert,
-  Stack
+  Divider
 } from "@mui/material";
-import { Lock, Person, Email } from "@mui/icons-material";
+import { Lock, Person, Email, PersonAdd } from "@mui/icons-material";
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fullName, setFullName] = useState(""); // Add full name field
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -26,21 +27,25 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (password !== confirmPassword) {
+      return setError("Passwords do not match");
+    }
+
     try {
       setError("");
       setLoading(true);
-      const { user } = await signInWithEmailAndPassword(auth, email, password);
       
-      // Update profile if name was provided
-      if (fullName.trim()) {
-        await updateProfile(user, {
-          displayName: fullName.trim()
-        });
-      }
+      // Create user
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Update profile with full name
+      await updateProfile(user, {
+        displayName: fullName
+      });
       
       navigate("/home");
     } catch (err) {
-      setError("Failed to sign in. " + err.message);
+      setError("Failed to create account. " + err.message);
     }
     setLoading(false);
   };
@@ -58,11 +63,11 @@ const LoginPage = () => {
     >
       <Paper elevation={3} sx={{ p: 4, maxWidth: 400, width: "100%" }}>
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
-            <Lock />
+          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+            <PersonAdd />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in to CashClass
+            Create Account
           </Typography>
         </Box>
 
@@ -73,11 +78,14 @@ const LoginPage = () => {
         )}
 
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          {/* Add Full Name Field */}
           <TextField
             margin="normal"
+            required
             fullWidth
-            label="Full Name (Optional)"
+            label="Full Name"
             autoComplete="name"
+            autoFocus
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             InputProps={{
@@ -102,11 +110,22 @@ const LoginPage = () => {
             fullWidth
             label="Password"
             type="password"
-            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             InputProps={{
-              startAdornment: <Person sx={{ mr: 1, color: "action.active" }} />
+              startAdornment: <Lock sx={{ mr: 1, color: "action.active" }} />
+            }}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Confirm Password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            InputProps={{
+              startAdornment: <Lock sx={{ mr: 1, color: "action.active" }} />
             }}
           />
           <Button
@@ -116,26 +135,24 @@ const LoginPage = () => {
             disabled={loading}
             sx={{ mt: 3, mb: 2, py: 1.5 }}
           >
-            Sign In
+            Sign Up
           </Button>
           
           <Divider sx={{ my: 2 }}>OR</Divider>
           
-          <Stack spacing={1}>
-            <Button
-              component={Link}
-              to="/register"
-              fullWidth
-              variant="outlined"
-              sx={{ py: 1.5 }}
-            >
-              Create New Account
-            </Button>
-          </Stack>
+          <Button
+            component={Link}
+            to="/login"
+            fullWidth
+            variant="outlined"
+            sx={{ py: 1.5 }}
+          >
+            Already have an account? Sign In
+          </Button>
         </Box>
       </Paper>
     </Box>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

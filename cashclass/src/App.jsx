@@ -1,23 +1,63 @@
+// src/App.js
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import LoginPage from "./components/LoginPage"; // Import LoginPage component
-import HomePage from "./components/HomePage"; // Import HomePage component
-import SavingsGoal from "./components/SavingsGoal"; // Import SavingsGoal component
-import FinancialOverview from "./components/FinancialOverview"; // Import FinancialOverview component
-import BillSplitting from "./components/BillSplitting"; // Import BillSplitting component
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import LoginPage from "./components/LoginPage";
+import RegisterPage from "./components/RegisterPage";
+import HomePage from "./components/HomePage";
+import SavingsGoal from "./components/SavingsGoal";
+import FinancialOverview from "./components/FinancialOverview";
+import BillSplitting from "./components/BillSplitting";
 
-const App = () => {
+function PrivateRoute({ children }) {
+  const { currentUser } = useAuth();
+  return currentUser ? children : <Navigate to="/login" />;
+}
+
+function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<LoginPage />} /> {/* Login Page route */}
-        <Route path="/home" element={<HomePage />} /> {/* HomePage route */}
-        <Route path="/savings-goal" element={<SavingsGoal />} /> {/* Savings Goal route */}
-        <Route path="/financial-overview" element={<FinancialOverview />} /> {/* Financial Overview route */}
-        <Route path="/bill-splitting" element={<BillSplitting />} /> {/* Bill Splitting route */}
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/home"
+            element={
+              <PrivateRoute>
+                <HomePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/savings-goal"
+            element={
+              <PrivateRoute>
+                <SavingsGoal />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/financial-overview"
+            element={
+              <PrivateRoute>
+                <FinancialOverview />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/bill-splitting"
+            element={
+              <PrivateRoute>
+                <BillSplitting />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/login" />} />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
-};
+}
 
 export default App;
