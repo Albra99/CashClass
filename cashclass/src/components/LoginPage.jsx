@@ -21,18 +21,34 @@ const LoginPage = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     
+    // Clear any previous errors
+    setError("");
+
     // Simple validation
-    if (!username.trim() || !password.trim()) {
-      setError("Please enter both username and password");
+    if (!username.trim()) {
+      setError("Username is required");
+      return;
+    }
+    if (!password.trim()) {
+      setError("Password is required");
       return;
     }
 
-    // Set session data
-    sessionStorage.setItem("username", username);
-    sessionStorage.setItem("email", `${username}@example.com`);
-    
-    // Navigate to home
-    navigate("/home");
+    try {
+      // Set session data
+      sessionStorage.setItem("isAuthenticated", "true");
+      sessionStorage.setItem("username", username);
+      sessionStorage.setItem("email", `${username}@example.com`);
+      
+      // Trigger authentication update across tabs/windows
+      window.dispatchEvent(new Event('storage'));
+      
+      // Navigate to home
+      navigate("/home");
+    } catch (err) {
+      setError("Failed to save session. Please try again.");
+      console.error("Login error:", err);
+    }
   };
 
   return (
@@ -52,7 +68,7 @@ const LoginPage = () => {
             <Lock />
           </Avatar>
           <Typography component="h1" variant="h5">
-            CashClass Login
+            Sign in
           </Typography>
         </Box>
 
@@ -68,6 +84,8 @@ const LoginPage = () => {
             required
             fullWidth
             label="Username"
+            autoComplete="username"
+            autoFocus
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -77,6 +95,7 @@ const LoginPage = () => {
             fullWidth
             label="Password"
             type="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -90,11 +109,9 @@ const LoginPage = () => {
           </Button>
         </Box>
 
-        <Box sx={{ textAlign: "center" }}>
-          <Typography variant="body2" color="text.secondary">
-            Demo credentials: any username/password
-          </Typography>
-        </Box>
+        <Typography variant="body2" color="text.secondary" align="center">
+          Demo: Use any username/password
+        </Typography>
       </Paper>
     </Box>
   );
