@@ -1,7 +1,6 @@
 // src/components/HomePage.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
 import {
   Box,
   Button,
@@ -22,21 +21,13 @@ import {
   TrendingUp,
   AccountBalanceWallet,
   CalendarMonth,
-  Notifications,
-  Logout
+  Notifications
 } from "@mui/icons-material";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const theme = useTheme();
-  const { currentUser, logout } = useAuth();
   
-  // Get first name from displayName or email
-  const firstName = currentUser?.displayName?.split(' ')[0] || 
-                   currentUser?.email?.split('@')[0] || 
-                   'Student';
-
-
   // Sample data - replace with your actual data
   const budgetData = {
     remaining: 1250,
@@ -56,18 +47,9 @@ const HomePage = () => {
     { icon: <Notifications />, label: "Reminders", path: "/reminders" }
   ];
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/login");
-    } catch (error) {
-      console.error("Failed to logout", error);
-    }
-  };
-
   return (
     <Box sx={{ p: 3 }}>
-      {/* Header with User Info */}
+      {/* Header */}
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -76,29 +58,19 @@ const HomePage = () => {
       }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-            Welcome back, {firstName}!
+            Welcome back, Student!
           </Typography>
           <Typography variant="subtitle1" color="text.secondary">
-            {currentUser?.email || 'Here\'s your financial overview'}
+            Here's your financial overview
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar sx={{ 
-            bgcolor: theme.palette.primary.main,
-            width: 56,
-            height: 56,
-            fontSize: '1.5rem'
-          }}>
-            {firstName.charAt(0).toUpperCase()}
-          </Avatar>
-          <Button 
-            variant="outlined" 
-            startIcon={<Logout />}
-            onClick={handleLogout}
-          >
-            Sign Out
-          </Button>
-        </Box>
+        <Avatar sx={{ 
+          bgcolor: theme.palette.primary.main,
+          width: 56,
+          height: 56
+        }}>
+          S
+        </Avatar>
       </Box>
 
       {/* Main Dashboard */}
@@ -126,7 +98,7 @@ const HomePage = () => {
               mb: 2,
               overflow: 'hidden'
             }}>
-              {budgetData.categories.map((category) => (
+              {budgetData.categories.map((category, index) => (
                 <Box
                   key={category.name}
                   sx={{

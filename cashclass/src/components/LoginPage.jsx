@@ -1,7 +1,6 @@
+// src/components/LoginPage.jsx
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "../firebase";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -9,40 +8,31 @@ import {
   Typography,
   Paper,
   Avatar,
-  Divider,
-  Alert,
-  Stack
+  Alert
 } from "@mui/material";
-import { Lock, Person, Email } from "@mui/icons-material";
+import { Lock } from "@mui/icons-material";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     
-    try {
-      setError("");
-      setLoading(true);
-      const { user } = await signInWithEmailAndPassword(auth, email, password);
-      
-      // Update profile if name was provided
-      if (fullName.trim()) {
-        await updateProfile(user, {
-          displayName: fullName.trim()
-        });
-      }
-      
-      navigate("/home");
-    } catch (err) {
-      setError("Failed to sign in. " + err.message);
+    // Simple validation
+    if (!username.trim() || !password.trim()) {
+      setError("Please enter both username and password");
+      return;
     }
-    setLoading(false);
+
+    // Set session data
+    sessionStorage.setItem("username", username);
+    sessionStorage.setItem("email", `${username}@example.com`);
+    
+    // Navigate to home
+    navigate("/home");
   };
 
   return (
@@ -62,7 +52,7 @@ const LoginPage = () => {
             <Lock />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in to CashClass
+            CashClass Login
           </Typography>
         </Box>
 
@@ -72,29 +62,14 @@ const LoginPage = () => {
           </Alert>
         )}
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            fullWidth
-            label="Full Name (Optional)"
-            autoComplete="name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            InputProps={{
-              startAdornment: <Person sx={{ mr: 1, color: "action.active" }} />
-            }}
-          />
+        <Box component="form" onSubmit={handleLogin} sx={{ mt: 3 }}>
           <TextField
             margin="normal"
             required
             fullWidth
-            label="Email Address"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            InputProps={{
-              startAdornment: <Email sx={{ mr: 1, color: "action.active" }} />
-            }}
+            label="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <TextField
             margin="normal"
@@ -102,36 +77,23 @@ const LoginPage = () => {
             fullWidth
             label="Password"
             type="password"
-            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            InputProps={{
-              startAdornment: <Person sx={{ mr: 1, color: "action.active" }} />
-            }}
           />
           <Button
             type="submit"
             fullWidth
             variant="contained"
-            disabled={loading}
             sx={{ mt: 3, mb: 2, py: 1.5 }}
           >
             Sign In
           </Button>
-          
-          <Divider sx={{ my: 2 }}>OR</Divider>
-          
-          <Stack spacing={1}>
-            <Button
-              component={Link}
-              to="/register"
-              fullWidth
-              variant="outlined"
-              sx={{ py: 1.5 }}
-            >
-              Create New Account
-            </Button>
-          </Stack>
+        </Box>
+
+        <Box sx={{ textAlign: "center" }}>
+          <Typography variant="body2" color="text.secondary">
+            Demo credentials: any username/password
+          </Typography>
         </Box>
       </Paper>
     </Box>

@@ -1,63 +1,45 @@
-// src/App.js
+// src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
-import RegisterPage from "./components/RegisterPage";
 import HomePage from "./components/HomePage";
-import SavingsGoal from "./components/SavingsGoal";
 import FinancialOverview from "./components/FinancialOverview";
 import BillSplitting from "./components/BillSplitting";
+import SavingsGoal from "./components/SavingsGoal";
 
-function PrivateRoute({ children }) {
-  const { currentUser } = useAuth();
-  return currentUser ? children : <Navigate to="/login" />;
-}
+const App = () => {
+  const isAuthenticated = !!sessionStorage.getItem("username");
 
-function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/home"
-            element={
-              <PrivateRoute>
-                <HomePage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/savings-goal"
-            element={
-              <PrivateRoute>
-                <SavingsGoal />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/financial-overview"
-            element={
-              <PrivateRoute>
-                <FinancialOverview />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/bill-splitting"
-            element={
-              <PrivateRoute>
-                <BillSplitting />
-              </PrivateRoute>
-            }
-          />
-          <Route path="/" element={<Navigate to="/login" />} />
-        </Routes>
-      </AuthProvider>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<LoginPage />} />
+        
+        {/* Protected Routes */}
+        <Route 
+          path="/home" 
+          element={isAuthenticated ? <HomePage /> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/financial-overview" 
+          element={isAuthenticated ? <FinancialOverview /> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/bill-splitting" 
+          element={isAuthenticated ? <BillSplitting /> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/savings-goal" 
+          element={isAuthenticated ? <SavingsGoal /> : <Navigate to="/login" />} 
+        />
+        
+        {/* Redirects */}
+        <Route path="/" element={<Navigate to={isAuthenticated ? "/home" : "/login"} />} />
+        <Route path="*" element={<Navigate to={isAuthenticated ? "/home" : "/login"} />} />
+      </Routes>
     </Router>
   );
-}
+};
 
 export default App;
